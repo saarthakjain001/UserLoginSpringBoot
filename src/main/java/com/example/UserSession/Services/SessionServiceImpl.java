@@ -8,6 +8,8 @@ import com.example.UserSession.Domain.UserDetails;
 import com.example.UserSession.Domain.Sessions.statusValues;
 import com.example.UserSession.Repositories.SessionRepository;
 import com.example.UserSession.Repositories.UserRepository;
+import com.example.UserSession.Services.Exceptions.InvalidUsernamePasswordException;
+import com.example.UserSession.Services.Exceptions.SessionIdInvalidException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ public class SessionServiceImpl implements SessionService {
     public Sessions login(Map<String, String> details) {
         UserDetails user = userrepository.findByUsernameAndPassword(details.get("username"), details.get("password"));
         if (user == null) {
-            return null;
+            throw new InvalidUsernamePasswordException("Wrong username or password entered");
         } else {
             if (sesrepository.findByUsernameAndStatus(details.get("username"), statusValues.ACTIVE) == null) {
                 Random rand = new Random();
@@ -54,8 +56,10 @@ public class SessionServiceImpl implements SessionService {
     public UserDetails logOut(Long sessionId) {
         Sessions session = sesrepository.getOne(sessionId);
         if (session == null)
-            return null;
+            throw new SessionIdInvalidException(String.format("The session Id = %s is invalid", sessionId));
         // sesrepository.deleteById(sessionId);
+        if (session.getStatus().equals(statusValues.INACTIVE))
+            throw new SessionIdInvalidException(String.format("The session Id = %s is invalid", sessionId));
         session.setStatus(statusValues.INACTIVE);
         String username = session.getUsername();
         sesrepository.save(session);

@@ -7,6 +7,7 @@ import com.example.UserSession.Domain.UserDetails;
 import com.example.UserSession.Domain.Sessions.statusValues;
 import com.example.UserSession.Repositories.SessionRepository;
 import com.example.UserSession.Repositories.UserRepository;
+import com.example.UserSession.Services.Exceptions.SessionIdInvalidException;
 
 import org.springframework.stereotype.Service;
 
@@ -29,12 +30,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails ShowDetails(Long sessionId) {
         Sessions session = sesrepository.findByIdAndStatus(sessionId, statusValues.ACTIVE);
-        if (session == null)
-            return null;
+        if (session == null) {
+            throw new SessionIdInvalidException(String.format("The session Id = %s is invalid", sessionId));
+        }
         if (session.getEndTime() < System.currentTimeMillis()) {
             session.setStatus(statusValues.INACTIVE);
             sesrepository.save(session);
-            return null;
+            throw new SessionIdInvalidException(String.format("The session Id = %s is invalid", sessionId));
+
         }
         String username = session.getUsername();
         UserDetails user = repository.findByUsername(username);
@@ -45,11 +48,11 @@ public class UserServiceImpl implements UserService {
     public UserDetails UpdateContact(Long sessionId, Map<String, Long> detail) {
         Sessions session = sesrepository.findByIdAndStatus(sessionId, statusValues.ACTIVE);
         if (session == null)
-            return null;
+            throw new SessionIdInvalidException(String.format("The session Id = %s is invalid", sessionId));
         if (session.getEndTime() < System.currentTimeMillis()) {
             session.setStatus(statusValues.INACTIVE);
             sesrepository.save(session);
-            return null;
+            throw new SessionIdInvalidException(String.format("The session Id = %s is invalid", sessionId));
         }
         String username = session.getUsername();
         UserDetails user = repository.findByUsername(username);
