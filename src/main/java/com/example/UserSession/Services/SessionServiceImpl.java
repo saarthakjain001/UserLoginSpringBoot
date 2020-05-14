@@ -5,9 +5,14 @@ import java.util.Random;
 
 import com.example.UserSession.Domain.Sessions;
 import com.example.UserSession.Domain.UserDetails;
+import com.example.UserSession.Domain.Sessions.statusValues;
 import com.example.UserSession.Repositories.SessionRepository;
 import com.example.UserSession.Repositories.UserRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
 public class SessionServiceImpl implements SessionService {
 
     private final SessionRepository sesrepository;
@@ -24,14 +29,24 @@ public class SessionServiceImpl implements SessionService {
         if (user == null) {
             return null;
         } else {
-            if (sesrepository.findByUsername(details.get("username")) == null) {
+            if (sesrepository.findByUsernameAndStatus(details.get("username"), statusValues.ACTIVE) == null) {
+                Random rand = new Random();
+
+                Sessions newSession = new Sessions(details.get("username"), rand.nextLong());
+                sesrepository.save(newSession);
+                return newSession;
+            } else {
+                Sessions temp = sesrepository.findByUsernameAndStatus(details.get("username"), statusValues.ACTIVE);
+                temp.setStatus(statusValues.INACTIVE);
+                sesrepository.save(temp);
                 Random rand = new Random();
 
                 Sessions newSession = new Sessions(details.get("username"), rand.nextLong());
                 sesrepository.save(newSession);
                 return newSession;
             }
-            return sesrepository.findByUsername(details.get("username"));
+            // return
+            // sesrepository.findByUsernameAndStatus(details.get("username"),statusValues.ACTIVE);
         }
     }
 
@@ -40,8 +55,10 @@ public class SessionServiceImpl implements SessionService {
         Sessions session = sesrepository.getOne(sessionId);
         if (session == null)
             return null;
-        sesrepository.deleteById(sessionId);
+        // sesrepository.deleteById(sessionId);
+        session.setStatus(statusValues.INACTIVE);
         String username = session.getUsername();
+        sesrepository.save(session);
         UserDetails user = userrepository.findByUsername(username);
         return user;
     }
