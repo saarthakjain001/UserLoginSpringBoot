@@ -3,7 +3,9 @@ package com.example.UserSession.Controllers;
 import java.util.Map;
 
 import com.example.UserSession.Domain.Sessions;
+import com.example.UserSession.Domain.SessionsDTO;
 import com.example.UserSession.Domain.UserDetails;
+import com.example.UserSession.Domain.UserDetailsDTO;
 import com.example.UserSession.Repositories.SessionRepository;
 import com.example.UserSession.Repositories.UserRepository;
 import com.example.UserSession.Services.SessionService;
@@ -26,13 +28,29 @@ public class SessionController {
     private SessionServiceImpl sessionService;
 
     @PostMapping("/user/login")
-    Sessions createSession(@RequestBody Map<String, String> details) {
-        return sessionService.login(details);
+    SessionsDTO createSession(@RequestBody Map<String, String> details) {
+        return sessionToDto(sessionService.login(details));
 
     }
 
     @PutMapping("user/logout/{sessionId}")
-    UserDetails exitSession(@PathVariable Long sessionId) {
-        return sessionService.logOut(sessionId);
+    UserDetailsDTO exitSession(@PathVariable Long sessionId) {
+        return userDetailsToDto(sessionService.logOut(sessionId));
     }
+
+    private SessionsDTO sessionToDto(Sessions session) {
+        SessionsDTO dto = new SessionsDTO();
+        dto.setUsername(session.getUsername());
+        dto.setSessionId(session.getId());
+        return dto;
+    }
+
+    private UserDetailsDTO userDetailsToDto(UserDetails userDetails) {
+        UserDetailsDTO dto = new UserDetailsDTO();
+        dto.setUsername(userDetails.getUsername());
+        dto.setName(userDetails.getName());
+        dto.setMobileNumber(userDetails.getMobileNumber());
+        return dto;
+    }
+
 }

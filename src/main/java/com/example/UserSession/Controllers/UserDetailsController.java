@@ -3,7 +3,9 @@ package com.example.UserSession.Controllers;
 import java.util.Map;
 
 import com.example.UserSession.Domain.Sessions;
+import com.example.UserSession.Domain.SessionsDTO;
 import com.example.UserSession.Domain.UserDetails;
+import com.example.UserSession.Domain.UserDetailsDTO;
 import com.example.UserSession.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +23,25 @@ public class UserDetailsController {
     private UserService userService;
 
     @PostMapping("/user/add")
-    UserDetails addUser(@RequestBody UserDetails user) {
-        return userService.AddUser(user);
+    UserDetailsDTO addUser(@RequestBody UserDetails user) {
+        return userDetailsToDto(userService.AddUser(user));
     }
 
     @PutMapping("/user/update/{sessionId}")
-    UserDetails updateContactDetails(@PathVariable Long sessionId, @RequestBody Map<String, Long> detail) {
-        return userService.UpdateContact(sessionId, detail);
+    UserDetailsDTO updateContactDetails(@PathVariable Long sessionId, @RequestBody Map<String, Long> detail) {
+        return userDetailsToDto(userService.UpdateContact(sessionId, detail));
     }
 
     @GetMapping("/user/details/{sessionId}")
-    UserDetails getDetails(@PathVariable Long sessionId) {
-        return userService.ShowDetails(sessionId);
+    UserDetailsDTO getDetails(@PathVariable Long sessionId) {
+        return userDetailsToDto(userService.ShowDetails(sessionId));
     }
 
+    private UserDetailsDTO userDetailsToDto(UserDetails userDetails) {
+        UserDetailsDTO dto = new UserDetailsDTO();
+        dto.setUsername(userDetails.getUsername());
+        dto.setName(userDetails.getName());
+        dto.setMobileNumber(userDetails.getMobileNumber());
+        return dto;
+    }
 }
