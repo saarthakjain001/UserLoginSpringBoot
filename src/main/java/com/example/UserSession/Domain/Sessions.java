@@ -1,5 +1,7 @@
 package com.example.UserSession.Domain;
 
+import java.sql.Time;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
