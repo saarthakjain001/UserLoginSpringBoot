@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.example.UserSession.Domain.Sessions;
 import com.example.UserSession.Domain.UserDetails;
+import com.example.UserSession.Domain.Sessions.statusValues;
 import com.example.UserSession.Repositories.SessionRepository;
 import com.example.UserSession.Repositories.UserRepository;
 
@@ -27,9 +28,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails ShowDetails(Long sessionId) {
-        Sessions session = sesrepository.getOne(sessionId);
+        Sessions session = sesrepository.findByIdAndStatus(sessionId, statusValues.ACTIVE);
         if (session == null)
             return null;
+        if (session.getEndTime() < System.currentTimeMillis()) {
+            session.setStatus(statusValues.INACTIVE);
+            sesrepository.save(session);
+            return null;
+        }
         String username = session.getUsername();
         UserDetails user = repository.findByUsername(username);
         return user;
@@ -37,9 +43,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails UpdateContact(Long sessionId, Map<String, Long> detail) {
-        Sessions session = sesrepository.getOne(sessionId);
+        Sessions session = sesrepository.findByIdAndStatus(sessionId, statusValues.ACTIVE);
         if (session == null)
             return null;
+        if (session.getEndTime() < System.currentTimeMillis()) {
+            session.setStatus(statusValues.INACTIVE);
+            sesrepository.save(session);
+            return null;
+        }
         String username = session.getUsername();
         UserDetails user = repository.findByUsername(username);
         user.setMobileNumber(detail.get("contact"));

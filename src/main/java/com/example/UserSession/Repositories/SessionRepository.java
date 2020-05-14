@@ -13,4 +13,6 @@ public interface SessionRepository extends JpaRepository<Sessions, Long> {
     Sessions findByStatus(statusValues status);
 
     Sessions findByUsernameAndStatus(String username, statusValues status);
+
+    Sessions findByIdAndStatus(Long id, statusValues status);
 }
